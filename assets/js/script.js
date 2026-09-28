@@ -60,37 +60,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Auto-detect portrait images & videos in gallery and adjust grid span
     document.querySelectorAll('.gallery-item').forEach(item => {
-        // Skip items that already have explicit span classes set manually
-        if (item.classList.contains('gallery-tall') ||
-            item.classList.contains('gallery-wide') ||
-            item.classList.contains('gallery-full')) return;
+        const hasManualSpan = item.classList.contains('gallery-tall') ||
+                              item.classList.contains('gallery-wide') ||
+                              item.classList.contains('gallery-full');
 
         const img = item.querySelector('img');
         const video = item.querySelector('video');
 
         if (img) {
-            const applyOrientation = () => {
-                if (img.naturalHeight > img.naturalWidth) {
+            const handleImgLoad = () => {
+                item.classList.add('loaded');
+                item.classList.remove('skeleton');
+                if (!hasManualSpan && img.naturalHeight > img.naturalWidth) {
                     item.classList.add('gallery-portrait');
                 }
             };
             if (img.complete && img.naturalWidth > 0) {
-                applyOrientation();
+                handleImgLoad();
             } else {
-                img.addEventListener('load', applyOrientation);
+                img.addEventListener('load', handleImgLoad);
             }
         }
 
         if (video) {
-            const applyVideoOrientation = () => {
-                if (video.videoHeight > video.videoWidth) {
+            const handleVideoLoad = () => {
+                item.classList.add('loaded');
+                item.classList.remove('skeleton');
+                if (!hasManualSpan && video.videoHeight > video.videoWidth) {
                     item.classList.add('gallery-portrait');
                 }
             };
             if (video.readyState >= 1 && video.videoWidth > 0) {
-                applyVideoOrientation();
+                handleVideoLoad();
             } else {
-                video.addEventListener('loadedmetadata', applyVideoOrientation);
+                video.addEventListener('loadedmetadata', handleVideoLoad);
+                video.addEventListener('canplay', handleVideoLoad);
             }
         }
     });
